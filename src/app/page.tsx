@@ -1,8 +1,11 @@
+
 import Glow from "../components/background/Glow";
 import FloatingLeaves from "../components/background/FloatingLeaves";
 import HeroAnimal from "../components/background/HeroAnimal";
 import AnimatedButton from "../components/ui/AnimationButton";
 import Panel from "../components/ui/Panel";
+import Link from "next/link";
+
 
 export default function Home(){
   return (
@@ -20,10 +23,11 @@ export default function Home(){
         <p className="mt-4 text-lg text-[#7A5A42]">
           Match adorable cozy animals and relax.
         </p>
-
+        <Link href="/game" className="block mt-10">
         <AnimatedButton className="mt-10 w-full">
           Play
         </AnimatedButton>
+        </Link>
       </Panel>
     </main>
   );
