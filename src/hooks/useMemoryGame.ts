@@ -58,7 +58,7 @@ export function useMemoryGame() {
 
     if (!canSelect(clickedCard)) return;
 
-    // Flip visually
+
     setCards((prev) =>
       prev.map((card) =>
         card.id === id
@@ -70,7 +70,7 @@ export function useMemoryGame() {
       )
     );
 
-    // Save selection
+
     setSelectedCards((prev) => [
       ...prev,
       {
