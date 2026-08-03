@@ -1,9 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+
 import { animals } from "../constants/animals";
 import { shuffle } from "../utils/shuffle";
 import { Card } from "../components/types/card";
+
+type SelectedCard = {
+  id: string;
+  image: string;
+};
 
 export function createDeck(): Card[] {
   const duplicatedCards = animals.flatMap((animal) => [
@@ -27,21 +33,32 @@ export function createDeck(): Card[] {
 export function useMemoryGame() {
   const [cards, setCards] = useState<Card[]>(createDeck);
 
-  const [firstCard, setFirstCard] = useState<string | null>(null);
-  const [secondCard, setSecondCard] = useState<string | null>(null);
+  const [selectedCards, setSelectedCards] = useState<SelectedCard[]>([]);
 
-  const [isLocked, setIsLocked] = useState(false);
   const [moves, setMoves] = useState(0);
 
-  function flipCard(id: string) {
-    if (isLocked) return;
+  const [isLocked, setIsLocked] = useState(false);
 
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  function canSelect(card: Card) {
+    if (isLocked) return false;
+
+    if (card.isMatched) return false;
+
+    if (card.isFlipped) return false;
+
+    return true;
+  }
+
+  function flipCard(id: string) {
     const clickedCard = cards.find((card) => card.id === id);
 
     if (!clickedCard) return;
-    if (clickedCard.isMatched) return;
-    if (clickedCard.isFlipped) return;
 
+    if (!canSelect(clickedCard)) return;
+
+    // Flip visually
     setCards((prev) =>
       prev.map((card) =>
         card.id === id
@@ -53,53 +70,56 @@ export function useMemoryGame() {
       )
     );
 
-    if (!firstCard) {
-      setFirstCard(id);
-      return;
-    }
-
-    setSecondCard(id);
+    // Save selection
+    setSelectedCards((prev) => [
+      ...prev,
+      {
+        id: clickedCard.id,
+        image: clickedCard.image,
+      },
+    ]);
   }
 
   useEffect(() => {
-    if (!firstCard || !secondCard) return;
+    if (selectedCards.length !== 2) return;
 
+    compareCards();
+  }, [selectedCards]);
+
+  function compareCards() {
     setIsLocked(true);
+
+    const [first, second] = selectedCards;
+
     setMoves((prev) => prev + 1);
 
-    checkMatch();
-  }, [firstCard, secondCard]);
-
-  function checkMatch() {
-    const first = cards.find((card) => card.id === firstCard);
-    const second = cards.find((card) => card.id === secondCard);
-
-    if (!first || !second) {
-      resetTurn();
-      return;
-    }
-
-    // Replace "image" with your matching property if needed
     if (first.image === second.image) {
-      setCards((prev) =>
-        prev.map((card) =>
-          card.id === first.id || card.id === second.id
-            ? {
-                ...card,
-                isMatched: true,
-              }
-            : card
-        )
-      );
-
-      resetTurn();
-      return;
+      handleMatch(first.id, second.id);
+    } else {
+      handleMismatch(first.id, second.id);
     }
+  }
 
-    setTimeout(() => {
+  function handleMatch(firstId: string, secondId: string) {
+    setCards((prev) =>
+      prev.map((card) =>
+        card.id === firstId || card.id === secondId
+          ? {
+              ...card,
+              isMatched: true,
+            }
+          : card
+      )
+    );
+
+    resetSelection();
+  }
+
+  function handleMismatch(firstId: string, secondId: string) {
+    timeoutRef.current = setTimeout(() => {
       setCards((prev) =>
         prev.map((card) =>
-          card.id === first.id || card.id === second.id
+          card.id === firstId || card.id === secondId
             ? {
                 ...card,
                 isFlipped: false,
@@ -108,13 +128,13 @@ export function useMemoryGame() {
         )
       );
 
-      resetTurn();
-    }, 800);
+      resetSelection();
+    }, 1800);
   }
 
-  function resetTurn() {
-    setFirstCard(null);
-    setSecondCard(null);
+  function resetSelection() {
+    setSelectedCards([]);
+
     setIsLocked(false);
   }
 
@@ -122,10 +142,26 @@ export function useMemoryGame() {
     cards.length > 0 && cards.every((card) => card.isMatched);
 
   function restartGame() {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+
     setCards(createDeck());
+
+    setSelectedCards([]);
+
     setMoves(0);
-    resetTurn();
+
+    setIsLocked(false);
   }
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   return {
     cards,
