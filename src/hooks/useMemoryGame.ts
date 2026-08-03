@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-
+import { Difficulty } from "@/components/types/difficulty";
+import { difficulties } from "@/constants/difficulties";
 import { animals } from "../constants/animals";
 import { shuffle } from "../utils/shuffle";
 import { Card } from "../components/types/card";
@@ -11,8 +12,10 @@ type SelectedCard = {
   image: string;
 };
 
-export function createDeck(): Card[] {
-  const duplicatedCards = animals.flatMap((animal) => [
+export function createDeck(pairCount: number): Card[] {
+  const selectedAnimals = shuffle([...animals]).slice(0, pairCount);
+
+  const duplicatedCards = selectedAnimals.flatMap((animal) => [
     {
       id: crypto.randomUUID(),
       ...animal,
@@ -31,16 +34,12 @@ export function createDeck(): Card[] {
 }
 
 export function useMemoryGame() {
-  const [cards, setCards] = useState<Card[]>(createDeck);
-
+  const [cards, setCards] = useState<Card[]>(() => createDeck(difficulties.easy.pairs));
+  const [difficulty, setDifficulty] = useState<Difficulty>("easy");
   const [selectedCards, setSelectedCards] = useState<SelectedCard[]>([]);
-
   const [moves, setMoves] = useState(0);
-
   const [isLocked, setIsLocked] = useState(false);
-
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-
   function canSelect(card: Card) {
     if (isLocked) return false;
 
@@ -146,7 +145,7 @@ export function useMemoryGame() {
       clearTimeout(timeoutRef.current);
     }
 
-    setCards(createDeck());
+    setCards(createDeck(difficulties[difficulty].pairs));
 
     setSelectedCards([]);
 
@@ -163,11 +162,25 @@ export function useMemoryGame() {
     };
   }, []);
 
+
+  function startGame(selectedDifficulty: Difficulty) {
+  if (timeoutRef.current) {
+    clearTimeout(timeoutRef.current);
+  }
+
+  setDifficulty(selectedDifficulty);
+  setCards(createDeck(difficulties[selectedDifficulty].pairs));
+  setSelectedCards([]);
+  setMoves(0);
+  setIsLocked(false);
+}
   return {
     cards,
     moves,
     gameWon,
+    difficulty,
     flipCard,
     restartGame,
+    startGame
   };
 }
