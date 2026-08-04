@@ -32,14 +32,16 @@ export function createDeck(pairCount: number): Card[] {
   return shuffle(duplicatedCards);
 }
 
-export function useMemoryGame() {
+export function useMemoryGame(difficulty: Difficulty) {
   const [cards, setCards] = useState<Card[]>([]);
-    useEffect(()=>{setCards(createDeck(difficulties.easy.pairs));},[]);
-  const [difficulty, setDifficulty] = useState<Difficulty>("easy");
   const [selectedCards, setSelectedCards] = useState<SelectedCard[]>([]);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [moves, setMoves] = useState(0);
   const [isLocked, setIsLocked] = useState(false);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  useEffect(() => {
+  if (timeoutRef.current) {
+    clearTimeout(timeoutRef.current);
+  } setCards(createDeck(difficulties[difficulty].pairs)); setSelectedCards([]); setMoves(0); setIsLocked(false);}, [difficulty]);
   function canSelect(card: Card) {
     if (isLocked) return false;
 
@@ -161,18 +163,6 @@ export function useMemoryGame() {
     };
   }, []);
 
-
-  function startGame(selectedDifficulty: Difficulty) {
-  if (timeoutRef.current) {
-    clearTimeout(timeoutRef.current);
-  }
-
-  setDifficulty(selectedDifficulty);
-  setCards(createDeck(difficulties[selectedDifficulty].pairs));
-  setSelectedCards([]);
-  setMoves(0);
-  setIsLocked(false);
-}
   return {
     cards,
     moves,
@@ -180,6 +170,5 @@ export function useMemoryGame() {
     difficulty,
     flipCard,
     restartGame,
-    startGame
   };
 }

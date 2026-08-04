@@ -35,8 +35,7 @@ export default function Home(){
         </AnimatedButton>
       </Panel>
         <DifficultyModal open={showDifficulty} onClose={() => setShowDifficulty(false)}  onSelect={(difficulty) => { setShowDifficulty(false);
-        localStorage.setItem("difficulty", difficulty);
-         router.push("/game");
+          router.push(`/game?difficulty=${difficulty}`);
   }}
 />
     </main>

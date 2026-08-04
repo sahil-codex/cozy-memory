@@ -11,13 +11,13 @@ type DifficultyModalProps = {
 
 };
 
-const difficultyIcons = {
+const difficultyIcons:Record<Difficulty, string> = {
     easy:"🌱",
     moderate:"🍂",
     hard:"🔥",
 };
 
-const difficultyDescriptions = {
+const difficultyDescriptions:Record<Difficulty, string> = {
     easy:"Perfect for relaxing",
     moderate:"A nice challenge",
     hard:"Test your memory",
@@ -36,7 +36,7 @@ export default function DifficultyModal({
                  animate={{opacity:1}}
                  exit={{opacity:0}}
                  onClick={onClose}
-                 className="fixed inset-0 -black/40 backdrop-blur-sm z-40"
+                 className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40"
                  />
                  <motion.div initial={{opacity:0,
                  scale:0.8,y:40,}}
@@ -63,7 +63,7 @@ export default function DifficultyModal({
                                     <motion.button key={difficulty}
                                     whileHover={{scale:1.02,y:-2,}}
                                     whileTap={{scale:0.98,}}
-                                    onClick={()=>onSelect(difficulty)}className="w-full rounded-2xl border-[#E7D7C5] bg-white p-5 text-left transition hover:shadow-lg">
+                                    onClick={()=>onSelect(difficulty)}className="w-full rounded-2xl border border-[#E7D7C5] bg-white p-5 text-left transition hover:shadow-lg">
                                     <div className="flex items-center gap-4">
                                     <div className="text-4xl">{difficultyIcons[difficulty]}</div>
                                     <div>
