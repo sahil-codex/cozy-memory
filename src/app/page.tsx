@@ -1,13 +1,17 @@
+"use client";
 
 import Glow from "../components/background/Glow";
 import FloatingLeaves from "../components/background/FloatingLeaves";
 import HeroAnimal from "../components/background/HeroAnimal";
 import AnimatedButton from "../components/ui/AnimationButton";
 import Panel from "../components/ui/Panel";
-import Link from "next/link";
-
+import DifficultyModal from "@/components/ui/DifficultyModal";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function Home(){
+  const [showDifficulty, setShowDifficulty] = useState(false);
+  const router = useRouter();
   return (
         <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#F7F1E6] p-6">
       <Glow />
@@ -23,12 +27,18 @@ export default function Home(){
         <p className="mt-4 text-lg text-[#7A5A42]">
           Match adorable cozy animals and relax.
         </p>
-        <Link href="/game" className="block mt-10">
-        <AnimatedButton className="mt-10 w-full">
+        <AnimatedButton
+          className="mt-10 w-full"
+          onClick={() => setShowDifficulty(true)}
+        >
           Play
         </AnimatedButton>
-        </Link>
       </Panel>
+        <DifficultyModal open={showDifficulty} onClose={() => setShowDifficulty(false)}  onSelect={(difficulty) => { setShowDifficulty(false);
+        localStorage.setItem("difficulty", difficulty);
+         router.push("/game");
+  }}
+/>
     </main>
   );
 }

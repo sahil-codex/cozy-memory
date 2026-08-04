@@ -14,7 +14,6 @@ type SelectedCard = {
 
 export function createDeck(pairCount: number): Card[] {
   const selectedAnimals = shuffle([...animals]).slice(0, pairCount);
-
   const duplicatedCards = selectedAnimals.flatMap((animal) => [
     {
       id: crypto.randomUUID(),
@@ -34,7 +33,8 @@ export function createDeck(pairCount: number): Card[] {
 }
 
 export function useMemoryGame() {
-  const [cards, setCards] = useState<Card[]>(() => createDeck(difficulties.easy.pairs));
+  const [cards, setCards] = useState<Card[]>([]);
+    useEffect(()=>{setCards(createDeck(difficulties.easy.pairs));},[]);
   const [difficulty, setDifficulty] = useState<Difficulty>("easy");
   const [selectedCards, setSelectedCards] = useState<SelectedCard[]>([]);
   const [moves, setMoves] = useState(0);
@@ -52,7 +52,6 @@ export function useMemoryGame() {
 
   function flipCard(id: string) {
     const clickedCard = cards.find((card) => card.id === id);
-
     if (!clickedCard) return;
 
     if (!canSelect(clickedCard)) return;
