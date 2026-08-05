@@ -9,6 +9,7 @@ type GameBoardProps = {
   cards: CardType[];
   flipCard: (id: string) => void;
   moves: number;
+  formattedTime:string;
   difficulty: Difficulty;
 };
 
@@ -29,13 +30,17 @@ export default function GameBoard({
   flipCard,
   moves,
   difficulty,
+  formattedTime,
 }: GameBoardProps) {
   const { columns } = difficulties[difficulty];
 
   return (
     <div>
+      <div className="flex gap-10 mb-8">
       <div className="flex items-center gap-8 text-2xl font-bold mb-6">
         <div>🎯 Moves : {moves}</div>
+        <div className="rounded-xl bg-white px-6 py-3 shadow">⏱ {formattedTime}</div>
+      </div>
       </div>
 
       <div className={`grid gap-4 ${gridColsClass[columns]}`}>
